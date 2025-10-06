@@ -10,47 +10,47 @@ namespace PlatformService.Controllers
     [ApiController]
     public class PlatformsController : ControllerBase
     {
-        private readonly IPlatformRepo repo;
-        private readonly IMapper mapper;
+        private readonly IPlatformRepo _repo;
+        private readonly IMapper _mapper;
 
         public PlatformsController(IPlatformRepo repo, IMapper mapper)
         {
-            this.repo = repo;
-            this.mapper = mapper;
+            this._repo = repo;
+            this._mapper = mapper;
         }
 
         [HttpGet]
-        public ActionResult<PlatformReadDto> GetPlatforms()
+        public ActionResult<IEnumerable<PlatformReadDto>> GetPlatforms()
         {
             Console.WriteLine("--> Getting platforms...");
 
-            var platforms = this.repo.GetAllPlatforms();
+            var platforms = this._repo.GetAllPlatforms();
 
-            return Ok(this.mapper.Map<IEnumerable<PlatformReadDto>>(platforms));
+            return Ok(this._mapper.Map<IEnumerable<PlatformReadDto>>(platforms));
         }
 
         [HttpGet("{id}", Name = "GetPlatformById")]
         public ActionResult<PlatformReadDto> GetPlatformById(int id)
         {
-            var platform = this.repo.GetPlatformById(id);
+            var platform = this._repo.GetPlatformById(id);
 
-            if (platform == null)
+            if (platform != null)
             {
-                return NotFound();
+                return Ok(this._mapper.Map<PlatformReadDto>(platform));
             }
 
-            return Ok(this.mapper.Map<PlatformReadDto>(platform));
+            return NotFound();
         }
 
         [HttpPost]
         public ActionResult<PlatformReadDto> CreatePlatform(PlatformCreateDto model)
         {
-            var platform = this.mapper.Map<Platform>(model);
+            var platform = this._mapper.Map<Platform>(model);
             
-            this.repo.CreatePlatform(platform);
-            this.repo.SaveChanges();
+            this._repo.CreatePlatform(platform);
+            this._repo.SaveChanges();
 
-            var platformReadDto = this.mapper.Map<PlatformReadDto>(platform);
+            var platformReadDto = this._mapper.Map<PlatformReadDto>(platform);
             return CreatedAtRoute(nameof(GetPlatformById), new { Id = platformReadDto.Id }, platformReadDto);
         }
     }
